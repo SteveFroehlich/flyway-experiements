@@ -9,7 +9,7 @@ public class ExternalDbTest {
   /*
       Test setup:
         $ docker image ls
-        if no postgres 14-alpine image run
+        if NO postgres 14-alpine image run
           $ docker pull postgres:14-alpine
         then run:
           $ ./run-postgres.sh
