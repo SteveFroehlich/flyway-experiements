@@ -27,6 +27,8 @@ public class ExternalDbTest {
       flyway = Flyway.configure()
           .dataSource(jdbcUrl, "postgres", "sa")
           .load();
+      // un comment 'flyway.clean();' below to clean the database to start fresh
+       flyway.clean();
       flyway.migrate();
 
     }

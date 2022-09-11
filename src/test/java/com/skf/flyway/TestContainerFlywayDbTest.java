@@ -1,16 +1,19 @@
 package com.skf.flyway;
 
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.migration.JavaMigration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.sql.*;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
-public class TestContainerDbTest {
+import static org.junit.Assert.assertTrue;
+
+public class TestContainerFlywayDbTest {
     /*
         Resources:
             Test container postgres info:
@@ -31,7 +34,6 @@ public class TestContainerDbTest {
 
   @Before
   public void setUp() {
-    JavaMigration migration;
     jdbcUrl = database.getJdbcUrl();
   }
 
@@ -43,11 +45,11 @@ public class TestContainerDbTest {
     flyway.migrate();
 
     Connection conn = getConnection();
-    insertData(conn);
+    verifyData(conn);
   }
 
   @Test
-  public void migrationTest() throws SQLException {
+  public void migrationToVersionTest() throws SQLException {
     // given initial migration to version 2
     String databaseVersion = "2";
     flyway = Flyway.configure()
@@ -58,7 +60,7 @@ public class TestContainerDbTest {
 
     // and some data is printed
     Connection conn = getConnection();
-    insertData(conn);
+    verifyData(conn);
 
     // when the version is updated
     databaseVersion = "4";
@@ -70,7 +72,7 @@ public class TestContainerDbTest {
         .load();
     flyway.migrate();
     // and print the db contents
-    insertData(conn);
+    verifyData(conn);
   }
 
   private Connection getConnection() throws SQLException {
@@ -81,17 +83,25 @@ public class TestContainerDbTest {
     return DriverManager.getConnection(jdbcUrl, props);
   }
 
-  private void insertData(Connection conn) {
+  private void verifyData(Connection conn) {
+    Set<String> users = new HashSet<>();
+
     String select = "select * from PERSON";
     try (Statement stmt = conn.createStatement()) {
       ResultSet rs = stmt.executeQuery(select);
       while (rs.next()) {
         int id = rs.getInt("ID");
         String name = rs.getString("NAME");
+        users.add(name);
         System.out.println("id=" + id + ", name=" + name);
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+
+    // below data must be in sync with V2__add_users.sql
+    assertTrue(users.contains("Axel"));
+    assertTrue(users.contains("Mr. Foo"));
+    assertTrue(users.contains("Ms. Bar"));
   }
 }

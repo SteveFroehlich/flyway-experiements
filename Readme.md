@@ -1,5 +1,15 @@
 # Flyway findings
 Skipping versions and interleaving them later won't work.
+
+## Version files
+Version files begin with: 
+```
+V__
+``` 
+they are the files
+that must be applied in order (in both sequence of files
+and time-date added) Otherwise
+
 Flyway will complain:
 ```
 FlywayValidateException: Validate failed: Migrations have failed validation
@@ -16,8 +26,18 @@ before merging to trunk
 from trunk before you merge, bump your unmerged migration file 
 versions and re-run tests
 
-# Tests
+### Tests
 see [external db test](src/test/java/com/skf/flyway/ExternalDbTest.java)
+
+## Repeatable migration files
+Repeatable migration files are used for managing database
+objects whose definition can be maintained by a single file
+and does not need multiple `V__` files. These files are prepended
+by:
+```
+R__
+```
+for more information see the [flyway docs](https://flywaydb.org/documentation/tutorials/repeatable.html)
 
 # Flyway docs
 https://flywaydb.org/documentation/usage/commandline/migrate
